@@ -12,6 +12,8 @@ class FirebaseAuthActivity: AppCompatActivity() {
 
 //    private var loginRegisterType = LoginRegisterType.LOGIN
 
+
+
     private lateinit var binding: ActivityFirebaseAuthBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
