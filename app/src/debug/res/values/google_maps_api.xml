@@ -1,0 +1,28 @@
+<resources>
+    <!--
+    TODO: Before you run your application, you need a Google Maps API key.
+
+    To get one, follow this link, follow the directions and press "Create" at the end:
+
+    https://console.developers.google.com/flows/enableapi?apiid=maps_android_backend&keyType=CLIENT_SIDE_ANDROID&r=5D:94:5F:3B:04:07:10:66:A5:77:C8:E0:08:FE:F6:D0:8E:7C:91:E1%3Bcom.github.shokitamoto.firebase
+    // 上記URLからAPIキーを作成し、下にキーを入れると（AIzaSyApbpnGRl3bNJPO_yHVi-fTh6cq_OCtCZk）googlemapを使用することができる。
+
+    You can also add your credentials to an existing key, using these values:
+
+    Package name:
+    com.github.shokitamoto.firebase
+
+    SHA-1 certificate fingerprint:
+    5D:94:5F:3B:04:07:10:66:A5:77:C8:E0:08:FE:F6:D0:8E:7C:91:E1
+    // ↑Debug用の証明書のハッシュ値(AndroidStudioをダウンロードするときに勝手に作られるもの）
+    // →署名するために証明書が必要
+    // 別途リリース用の証明書が必要
+
+    Alternatively, follow the directions here:
+    https://developers.google.com/maps/documentation/android/start#get-key
+
+    Once you have your key (it starts with "AIza"), replace the "google_maps_key"
+    string in this file.
+    -->
+    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">AIzaSyApbpnGRl3bNJPO_yHVi-fTh6cq_OCtCZk</string>
+</resources>

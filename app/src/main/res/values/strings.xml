@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">FirebaseExample</string>
+    <string name="firebase_auth_mail">メールアドレス</string>
+    <string name="firebase_auth_hint_mail">メールアドレスを入力してください</string>
+    <string name="firebase_auth_password">パスワード</string>
+    <string name="firebase_auth_hint_password">8文字以上16文字以内</string>
+    <string name="firebase_auth_register">アカウント登録</string>
+    <string name="firebase_auth_register_send">登録</string>
+    <string name="firebase_auth_login">ログイン</string>
+    <string name="firebase_auth_forget_password">パスワードを忘れたら</string>
+    <string name="firebase_auth_forget_password_send">送信</string>
+
+</resources>
