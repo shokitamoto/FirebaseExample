@@ -9,5 +9,8 @@
     <string name="firebase_auth_login">ログイン</string>
     <string name="firebase_auth_forget_password">パスワードを忘れたら</string>
     <string name="firebase_auth_forget_password_send">送信</string>
-
+    <string name="firebase_auth_success">ログインしました</string>
+    <string name="firebase_auth_error">ログイン失敗</string>
+    <string name="firebase_auth_warn_mail">メールアドレスを正しく入力してください</string>
+    <string name="firebase_auth_warn_password">パスワードを正しく入力してください</string>
 </resources>
