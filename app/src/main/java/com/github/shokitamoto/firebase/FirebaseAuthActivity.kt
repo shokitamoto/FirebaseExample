@@ -70,7 +70,7 @@ class FirebaseAuthActivity: AppCompatActivity() {
             }
 
             registerSendButton.setOnClickListener {
-                login()
+                register()
             }
 
             forgetPasswordSendButton.setOnClickListener {
@@ -104,6 +104,18 @@ class FirebaseAuthActivity: AppCompatActivity() {
                     }
                     moveMainActivity()
                     toast(if (task.isSuccessful) R.string.firebase_auth_success else R.string.firebase_auth_error)
+                }
+        }
+    }
+    private fun register() {
+        val pair = getPair()
+        pair?.also {
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(it.first, it.second)
+                .addOnCompleteListener { task ->
+                    if (!task.isSuccessful) { // 失敗した時
+                        return@addOnCompleteListener
+                    }
+                    moveMainActivity()
                 }
         }
     }
