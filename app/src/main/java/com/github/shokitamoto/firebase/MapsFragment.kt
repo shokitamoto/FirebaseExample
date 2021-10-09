@@ -24,6 +24,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.maps.model.PolylineOptions
 import java.util.jar.Manifest
 
 class MapsFragment : Fragment() {
@@ -40,7 +41,6 @@ class MapsFragment : Fragment() {
          * install it inside the SupportMapFragment. This method will only be triggered once the
          * user has installed Google Play services and returned to the app.
          */
-//        シドニーのマーカー
 //        val sydney = LatLng(-34.0, 151.0)
 //        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
 //        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
@@ -61,8 +61,20 @@ class MapsFragment : Fragment() {
             // todo: fuse~~ アプリの起動中にはひたすらRealmやRoomにデータを書き込んでいく
             // todo: infowindowまずは画像を使わない -> 余裕が出れば画像がある場合の実装(githubでやり方検索)
             // infowindow画像がアプリの中にある場合は問題ないが、FireStoreの画像を引っ張ってくる場合は画像の再描画が必要。グライドで画像を表示する。画像の読み込みが終わったを知らせるコールバックを使用したあとに再描画をする。
-
         }
+
+        val polyline = googleMap.addPolyline(
+            PolylineOptions()
+                .clickable(true)
+                .add(
+                    LatLng(-35.016, 143.321),
+                    LatLng(-34.747, 145.592),
+                    LatLng(-34.364, 147.891),
+                    LatLng(-33.501, 150.217),
+                    LatLng(-32.306, 149.248),
+                    LatLng(-32.491, 147.309)
+                )
+        )
     }
 
     override fun onCreateView(

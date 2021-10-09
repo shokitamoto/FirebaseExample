@@ -8,25 +8,64 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Looper
 import android.provider.Settings
+import android.widget.Toast
+import android.widget.Toast.makeText
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.location.*
 import com.google.android.gms.tasks.Task
 
 class MainActivity : AppCompatActivity() {
 
     private var hasCompletedInitMap = false
     private val sharedPreference by lazy { getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE) } // MODE_PRIVATE 他のアプリから見られなくなる。
+    private lateinit var fusedLocationClient : FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        fusedLocationClient = FusedLocationProviderClient(this)
 
+        // どのような取得方法を要求するか
+        val locationRequest = LocationRequest.create()?.apply {
+            // 精度重視(電力大)と省電力重視(精度低)を両立するため2種類の更新間隔を指定
+            // 公式のサンプル通り
+            interval = 10000 // 最遅の更新間隔(正確ではない)
+            fastestInterval = 5000 // 最短の更新間隔
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY // 精度重視
+        }
+
+        // コールバック
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                // 更新直後の位置が格納されているはず
+                val location = locationResult?.lastLocation ?: return
+                Toast.makeText(this@MainActivity, "緯度:${location.latitude}, 軽度:${location.longitude}", Toast.LENGTH_LONG).show()
+            }
+        }
+        // 位置情報を更新
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return
+        }
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
     }
 
     override fun onResume() {
@@ -87,6 +126,7 @@ class MainActivity : AppCompatActivity() {
         intent.data= uri
         startActivity(intent)
     }
+
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1000
