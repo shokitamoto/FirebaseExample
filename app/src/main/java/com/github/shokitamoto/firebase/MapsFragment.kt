@@ -1,11 +1,22 @@
 package com.github.shokitamoto.firebase
 
+import android.annotation.SuppressLint
+import android.content.Context.LOCATION_SERVICE
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import androidx.fragment.app.Fragment
 
 import android.os.Bundle
+import android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getSystemService
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -13,8 +24,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import java.util.jar.Manifest
 
 class MapsFragment : Fragment() {
+
+    @SuppressLint("MissingPermission") // 「googleMap.isMyLocationEnabled = true」はパーミッションのチェックをしてからじゃないと呼べないが、「@SuppressLint("MissingPermission")」をつけることでチェックなしに呼べる。
 
     private val callback = OnMapReadyCallback { googleMap ->
         /**
@@ -26,10 +40,12 @@ class MapsFragment : Fragment() {
          * install it inside the SupportMapFragment. This method will only be triggered once the
          * user has installed Google Play services and returned to the app.
          */
-        val sydney = LatLng(-34.0, 151.0)
-        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+//        シドニーのマーカー
+//        val sydney = LatLng(-34.0, 151.0)
+//        googleMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
 
+        googleMap.isMyLocationEnabled = true
         googleMap.uiSettings.apply {
             isMyLocationButtonEnabled = true //現在地取得
             isScrollGesturesEnabled = true //スワイプで地図を平行移動
@@ -39,9 +55,6 @@ class MapsFragment : Fragment() {
             isTiltGesturesEnabled = true // 2本指でスワイプで視点を傾けることができる
             isCompassEnabled = true // コンパスの表示
 
-
-            // todo: android permission 現在地取得の許可をとる。許可をとれない場合の挙動も考える。
-            // 現在地の許可を取得しなくても地図表示 or 許可がないと地図取得しない
 
             // todo: marker(ピン)
             // todo: polyline(線) ○○km以上移動した場合に線を引くなどの設定
@@ -62,8 +75,10 @@ class MapsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.fragment_maps) as SupportMapFragment?
+        val mapFragment =
+            childFragmentManager.findFragmentById(R.id.fragment_maps) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
     }
+
 
 }

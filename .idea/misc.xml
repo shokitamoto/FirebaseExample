@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="app/src/main/res/layout/activity_firebase_auth.xml" value="0.2805054680968217" />
+        <entry key="app/src/main/res/layout/activity_main.xml" value="0.23958333333333334" />
         <entry key="app/src/main/res/layout/firebase_auth_activity.xml" value="0.335" />
         <entry key="app/src/main/res/layout/fragment_maps.xml" value="0.140625" />
       </map>

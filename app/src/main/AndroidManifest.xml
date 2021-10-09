@@ -10,6 +10,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
+    // バックグラウンドでの位置情報へのアクセス（バックグラウンドの時も位置情報を記録する必要があるから）
+    // https://developer.android.com/training/location/permissions?hl=ja#foreground
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -28,7 +32,8 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" /> // my API_KEY
+            android:value="@string/google_maps_key" />
+        // my API_KEY
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -39,12 +44,9 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-
         </activity>
-        <activity android:name=".MainActivity">
-       </activity>
 
+        <activity android:name=".MainActivity"></activity>
 
     </application>
 
