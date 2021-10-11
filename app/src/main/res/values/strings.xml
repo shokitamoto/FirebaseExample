@@ -13,4 +13,12 @@
     <string name="firebase_auth_error">ログイン失敗</string>
     <string name="firebase_auth_warn_mail">メールアドレスを正しく入力してください</string>
     <string name="firebase_auth_warn_password">パスワードを正しく入力してください</string>
+
+    <string name="navigation_photo">Photo</string>
+    <string name="navigation_calender">Calender</string>
+    <string name="navigation_maps">Maps</string>
+    <string name="navigation_add_pin">Add Pin</string>
+    <string name="navigation_account">Account</string>
+
+
 </resources>

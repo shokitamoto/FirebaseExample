@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/navigation_maps">
+
+    <fragment
+        android:id="@+id/navigation_photo"
+        android:name="com.github.shokitamoto.firebase.PhotoFragment"
+        android:label="fragment_photo" />
+
+    <fragment
+        android:id="@+id/navigation_calender"
+        android:name="com.github.shokitamoto.firebase.CalenderFragment"
+        android:label="fragment_calender" />
+
+    <fragment
+        android:id="@+id/navigation_maps"
+        android:name="com.github.shokitamoto.firebase.MapsFragment"
+        android:label="fragment_maps" />
+
+    <fragment
+        android:id="@+id/navigation_add_pin"
+        android:name="com.github.shokitamoto.firebase.AddPinFragment"
+        android:label="fragment_add_pin" />
+
+    <fragment
+        android:id="@+id/navigation_account"
+        android:name="com.github.shokitamoto.firebase.AccountFragment"
+        android:label="fragment_account" />
+</navigation>
