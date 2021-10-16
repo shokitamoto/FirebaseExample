@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -18,12 +19,24 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI.setupWithNavController
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.tasks.Task
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import io.realm.Realm
+import io.realm.kotlin.where
+import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
     private var hasCompletedInitMap = false
     private val sharedPreference by lazy { getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE) } // MODE_PRIVATE 他のアプリから見られなくなる。
+    private var lastLocation: Location? = null
+    private lateinit var realm : Realm
+    private lateinit var mMap: GoogleMap
 
     // 現在地の取得
     private lateinit var fusedLocationClient : FusedLocationProviderClient
@@ -33,17 +46,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val navController = findNavController(R.id.nav_host_fragment)
+//      kotlin-android-extensionsを使用しない場合は、必要 ->  val bottom_navigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         setupWithNavController(bottom_navigation, navController)
 
         fusedLocationClient = FusedLocationProviderClient(this)
+        realm = Realm.getDefaultInstance()
 
 
-        // どのような取得方法を要求するか
+        // どのような取得方法を要求するか. 地図ではなく、realmなどデータに保存するためのもの
         val locationRequest = LocationRequest.create()?.apply {
             // 精度重視(電力大)と省電力重視(精度低)を両立するため2種類の更新間隔を指定
             // 公式のサンプル通り
-            interval = 10000 // 最遅の更新間隔(正確ではない)
-            fastestInterval = 5000 // 最短の更新間隔
+            interval = 60000 // 最遅の更新間隔(正確ではない)
+            fastestInterval = 10000 // 最短の更新間隔
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY // 精度重視
         }
 
@@ -51,10 +66,30 @@ class MainActivity : AppCompatActivity() {
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 // 更新直後の位置が格納されているはず
-                val location = locationResult?.lastLocation ?: return
-                Toast.makeText(this@MainActivity, "緯度:${location.latitude}, 軽度:${location.longitude}", Toast.LENGTH_LONG).show()
+                val newLocation = locationResult?.lastLocation ?: return
+                if (lastLocation == null) {
+                    lastLocation = newLocation
+                }
+                // Realmに保存する（
+
+                val distance = getDistance(lastLocation, newLocation)
+                if (lastLocation == null || (distance != null && distance > MIN_DISTANCE)) {
+                    realm.executeTransaction { realm ->
+                        val locationData = realm.createObject(LocationData::class.java, UUID.randomUUID().toString())
+                        locationData.createdAt = System.currentTimeMillis()
+                        locationData.latitude = lastLocation?.latitude
+                        locationData.longitude = lastLocation?.longitude
+                    }
+                    putMakers()
+
+                    lastLocation = newLocation
+                }
+
             }
+
         }
+
+
         // 位置情報を更新
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -64,16 +99,55 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return
         }
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper())
+        try {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.myLooper()
+            )
+        } catch (e: Exception) {
+            println("-----------------------")
+            e.printStackTrace()
+            println("-----------------------")
+        }
+    }
+
+
+    /*
+      * 2点間の距離（メートル）、方位角（始点、終点）を取得
+      * ※配列で返す[距離、始点から見た方位角、終点から見た方位角]
+      */
+    fun getDistance(oldLocation: Location?, newLocation: Location?): Float? {
+        // 結果を格納するための配列を生成
+        val results = FloatArray(3)
+        if (oldLocation == null || newLocation == null) {
+            return null
+        }
+        // 距離計算
+        Location.distanceBetween(oldLocation.latitude, oldLocation.longitude, newLocation.latitude, newLocation.longitude, results)
+        return results[0]
+
+//        https://qiita.com/a_nishimura/items/6c2642343c0af832acd4
+//        distance[0] = [２点間の距離]
+//        distance[1] = [始点から見た方位角]
+//        distance[2] = [終点から見た方位角]
+    }
+
+    private fun putMakers() {
+        mMap.clear()
+        val realmResults = realm.where(LocationData::class.java).findAll()
+        for (locationData: LocationData in realmResults) {
+            val latLng = LatLng(locationData.latitude, locationData.longitude)
+            val marker = MarkerOptions().position(latLng) // 場所
+            val descriptor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+            marker.icon(descriptor)
+
+            mMap.addMarker(marker)
+
+
+        }
     }
 
     override fun onResume() {
@@ -135,10 +209,15 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        realm.close()
+    }
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1000
         private const val IS_CHECKED_NOT_ASK_AGAIN_LOCATION = "IS_CHECKED_NOT_ASK_AGAIN_LOCATION"
+        private const val MIN_DISTANCE = 1000F // 1km
     }
 
 }
