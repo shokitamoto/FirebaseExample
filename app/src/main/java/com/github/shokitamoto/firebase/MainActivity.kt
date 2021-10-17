@@ -36,7 +36,6 @@ class MainActivity : AppCompatActivity() {
     private val sharedPreference by lazy { getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE) } // MODE_PRIVATE 他のアプリから見られなくなる。
     private var lastLocation: Location? = null
     private lateinit var realm : Realm
-    private lateinit var mMap: GoogleMap
 
     // 現在地の取得
     private lateinit var fusedLocationClient : FusedLocationProviderClient
@@ -46,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val navController = findNavController(R.id.nav_host_fragment)
-//      kotlin-android-extensionsを使用しない場合は、必要 ->  val bottom_navigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        val bottom_navigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         setupWithNavController(bottom_navigation, navController)
 
         fusedLocationClient = FusedLocationProviderClient(this)
@@ -67,20 +66,16 @@ class MainActivity : AppCompatActivity() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 // 更新直後の位置が格納されているはず
                 val newLocation = locationResult?.lastLocation ?: return
-                if (lastLocation == null) {
-                    lastLocation = newLocation
-                }
-                // Realmに保存する（
 
+                // Realmに保存する
                 val distance = getDistance(lastLocation, newLocation)
+                println("distance:$distance")
+
                 if (lastLocation == null || (distance != null && distance > MIN_DISTANCE)) {
-                    realm.executeTransaction { realm ->
-                        val locationData = realm.createObject(LocationData::class.java, UUID.randomUUID().toString())
-                        locationData.createdAt = System.currentTimeMillis()
-                        locationData.latitude = lastLocation?.latitude
-                        locationData.longitude = lastLocation?.longitude
-                    }
-                    putMakers()
+                    LocationData.insertOrUpdate(LocationData().apply {
+                        latitude = newLocation.latitude
+                        longitude = newLocation.longitude
+                    })
 
                     lastLocation = newLocation
                 }
@@ -126,28 +121,19 @@ class MainActivity : AppCompatActivity() {
             return null
         }
         // 距離計算
-        Location.distanceBetween(oldLocation.latitude, oldLocation.longitude, newLocation.latitude, newLocation.longitude, results)
+        Location.distanceBetween(
+            oldLocation.latitude,
+            oldLocation.longitude,
+            newLocation.latitude,
+            newLocation.longitude,
+            results
+        )
         return results[0]
 
 //        https://qiita.com/a_nishimura/items/6c2642343c0af832acd4
 //        distance[0] = [２点間の距離]
 //        distance[1] = [始点から見た方位角]
 //        distance[2] = [終点から見た方位角]
-    }
-
-    private fun putMakers() {
-        mMap.clear()
-        val realmResults = realm.where(LocationData::class.java).findAll()
-        for (locationData: LocationData in realmResults) {
-            val latLng = LatLng(locationData.latitude, locationData.longitude)
-            val marker = MarkerOptions().position(latLng) // 場所
-            val descriptor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
-            marker.icon(descriptor)
-
-            mMap.addMarker(marker)
-
-
-        }
     }
 
     override fun onResume() {

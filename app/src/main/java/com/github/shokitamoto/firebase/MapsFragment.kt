@@ -22,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
@@ -75,6 +76,15 @@ class MapsFragment : Fragment() {
                     LatLng(-32.491, 147.309)
                 )
         )
+
+        LocationData.findAll().forEach {
+            val marker = MarkerOptions().position(LatLng(it.latitude, it.longitude)) // 場所
+            val descriptor = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+            marker.icon(descriptor)
+            googleMap.addMarker(marker)
+        }
+
+
     }
 
     override fun onCreateView(
