@@ -26,9 +26,13 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import io.realm.Realm
 import java.util.jar.Manifest
 
 class MapsFragment : Fragment() {
+
+    private lateinit var realm : Realm
+
 
     @SuppressLint("MissingPermission") // 「googleMap.isMyLocationEnabled = true」はパーミッションのチェックをしてからじゃないと呼べないが、「@SuppressLint("MissingPermission")」をつけることでチェックなしに呼べる。
 
@@ -102,5 +106,8 @@ class MapsFragment : Fragment() {
         mapFragment?.getMapAsync(callback)
     }
 
-
+    override fun onDestroy() {
+        super.onDestroy()
+        realm.close()
+    }
 }

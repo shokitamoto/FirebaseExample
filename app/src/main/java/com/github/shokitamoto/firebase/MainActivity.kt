@@ -3,32 +3,23 @@ package com.github.shokitamoto.firebase
 import android.Manifest
 import android.content.Context
 import android.content.Intent
-import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Looper
 import android.provider.Settings
-import android.widget.Toast
-import android.widget.Toast.makeText
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.findNavController
 import androidx.navigation.ui.NavigationUI.setupWithNavController
-import com.google.android.gms.common.api.ResolvableApiException
-import com.google.android.gms.location.*
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.Task
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.realm.Realm
-import io.realm.kotlin.where
-import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -45,8 +36,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val navController = findNavController(R.id.nav_host_fragment)
-        val bottom_navigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
-        setupWithNavController(bottom_navigation, navController)
+        val bottomNavigation = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        setupWithNavController(bottomNavigation, navController)
 
         fusedLocationClient = FusedLocationProviderClient(this)
         realm = Realm.getDefaultInstance()
@@ -138,17 +129,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        if (ActivityCompat.checkSelfPermission(this@MainActivity, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
         ) {
             if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)
                 &&
                 sharedPreference.getBoolean(IS_CHECKED_NOT_ASK_AGAIN_LOCATION, false)) {
-                    // TODO: showDialog()
+                showAlertDialog()
                 showSettingApp()
                 return
             }
             ActivityCompat.requestPermissions(
-                this,
+                this@MainActivity,
                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_LOCATION_PERMISSION)
             return
         }
@@ -188,17 +179,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showSettingApp() { // TODO:下記のプログラム前にDialogを出して、ユーザーに設定画面から位置情報権限をONにしてもらう必要がある。
+    private fun showSettingApp() {
         val intent= Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri: Uri= Uri.fromParts("package", packageName, null)
         intent.data= uri
         startActivity(intent)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        realm.close()
+    private fun showAlertDialog() {
+        AlertDialog.Builder(this)
+            .setTitle("@string/permission_alert_title")
+            .setMessage("@string/permission_alert_massage")
+            .setPositiveButton("OK") { dialog, which -> }
+            .show()
     }
+
+
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        realm.close()
+//    }
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1000
@@ -207,6 +207,4 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
-
-
 

@@ -20,5 +20,9 @@
     <string name="navigation_add_pin">Add Pin</string>
     <string name="navigation_account">Account</string>
 
+    <string name="permission_alert_title">設定画面に移動</string>
+    <string name="permission_alert_massage">位置情報をONにしてください。</string>
+
+
 
 </resources>
