@@ -18,6 +18,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import io.realm.Realm
 
@@ -25,7 +26,10 @@ class MainActivity : AppCompatActivity() {
 
     private var hasCompletedInitMap = false
     private val sharedPreference by lazy { getSharedPreferences(BuildConfig.APPLICATION_ID, Context.MODE_PRIVATE) } // MODE_PRIVATE 他のアプリから見られなくなる。
-    private var lastLocation: Location? = null
+    private var lastLocation: LatLng? =
+        LocationData.findLast()?.let {
+            LatLng(it.latitude, it.longitude) // LocationData -> LatLngへ型変更。一番はじめだけnullになる。はじめの1回以外は最後に取得した緯度経度
+        }
     private lateinit var realm : Realm
 
     // 現在地の取得
@@ -62,13 +66,13 @@ class MainActivity : AppCompatActivity() {
                 val distance = getDistance(lastLocation, newLocation)
                 println("distance:$distance")
 
-                if (lastLocation == null || (distance != null && distance > MIN_DISTANCE)) {
+                if (lastLocation == null || (distance != null && distance > MIN_DISTANCE)) { // lastLocation == null -> 一番最初のデータのとき
                     LocationData.insertOrUpdate(LocationData().apply {
                         latitude = newLocation.latitude
                         longitude = newLocation.longitude
                     })
 
-                    lastLocation = newLocation
+                    lastLocation = LatLng(newLocation.latitude, newLocation.longitude)
                 }
 
             }
@@ -105,7 +109,7 @@ class MainActivity : AppCompatActivity() {
       * 2点間の距離（メートル）、方位角（始点、終点）を取得
       * ※配列で返す[距離、始点から見た方位角、終点から見た方位角]
       */
-    fun getDistance(oldLocation: Location?, newLocation: Location?): Float? {
+    fun getDistance(oldLocation: LatLng?, newLocation: Location?): Float? {
         // 結果を格納するための配列を生成
         val results = FloatArray(3)
         if (oldLocation == null || newLocation == null) {
@@ -195,10 +199,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        realm.close()
-//    }
 
     companion object {
         private const val REQUEST_LOCATION_PERMISSION = 1000
