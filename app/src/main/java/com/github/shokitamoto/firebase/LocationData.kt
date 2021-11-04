@@ -42,7 +42,7 @@ open class LocationData : RealmObject() {
             realm.where(LocationData::class.java)
                 .sort(LocationData::createdAt.name, Sort.DESCENDING) // DESCENDING(降順のfindFirstで最後のやつをとる。
                 .findFirst()
-                .let {
+                ?.let {
                     realm.copyFromRealm(it)
                 }
         }

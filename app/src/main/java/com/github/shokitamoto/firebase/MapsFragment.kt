@@ -1,6 +1,7 @@
 package com.github.shokitamoto.firebase
 
 import android.annotation.SuppressLint
+import android.content.ContentValues.TAG
 import android.content.Context.LOCATION_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,12 +20,15 @@ import android.view.ViewGroup
 import androidx.annotation.MainThread
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.databinding.DataBindingUtil
+import com.github.shokitamoto.firebase.databinding.FragmentMapsBinding
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,6 +42,9 @@ class MapsFragment : Fragment() {
     private var polyline: Polyline? = null
 
     private var timer: Timer? = null
+    private val db = FirebaseFirestore.getInstance()
+    private var binding: FragmentMapsBinding? = null
+
 
     @SuppressLint("MissingPermission") // 「googleMap.isMyLocationEnabled = true」はパーミッションのチェックをしてからじゃないと呼べないが、「@SuppressLint("MissingPermission")」をつけることでチェックなしに呼べる。
 
@@ -88,6 +95,18 @@ class MapsFragment : Fragment() {
         val mapFragment =
             childFragmentManager.findFragmentById(R.id.fragment_maps) as SupportMapFragment?
         mapFragment?.getMapAsync(callback)
+
+        val bindingData: FragmentMapsBinding? = DataBindingUtil.bind(view)
+        binding = bindingData ?: null
+        bindingData?.user1?.setOnClickListener {
+            // todo: user1の表示処理
+        }
+        bindingData?.user2?.setOnClickListener {
+            // todo: user2の表示処理
+        }
+        bindingData?.user3?.setOnClickListener {
+            // todo: user3の表示処理
+        }
     }
 
     override fun onResume() {
@@ -140,8 +159,7 @@ class MapsFragment : Fragment() {
                 map?.addMarker(markerOptions)?.also { marker ->
                     markers.add(marker) // markerがnull以外の時しか入れないよ
                 }
-
-        }
+            }
     }
 
     private fun updatePolyline(list: List<LocationData>) {
@@ -162,19 +180,36 @@ class MapsFragment : Fragment() {
 
     }
 
-    private fun test(list: List<LocationFirebase>) {
-        val uids = list.map { it.uid }.toSet() // uidの重複なしのリストを取得できる。toSetは重複なし。
+
+
+    private fun usersMaps(list: List<LocationFirebase>) {
+        val uids = list.map { LocationFirebase ->
+            LocationFirebase.uid
+        }.toSet() // Setに変換。uidの重複なしのリストを取得できる。toSetは重複なしで順序あり。　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　
         val map: Map<String, List<LocationFirebase>> = uids.map { uid -> // ある人が旅で行った全工程が入っているmapを取得 // StringはuidがStringだから。
             Pair(uid, list.filter { it.uid == uid})
-        }.toMap()
+        }.toMap() // Mapに変換している
 
 //        val aList: List<LocationFirebase>? = map["aさんのuid"] // 取得し、マーカーとポリラインを変更すると、地図上にaさんの地図が表示される。
 //        val bList: List<LocationFirebase>? = map["bさんのuid"]
 
     }
 
+//    private fun addData(db:LocationFirebase, uid: String, latitude: Double, longitude: Double) {
+//        db.collection(users)
+//            .add(user)
+//
+//            .addOnSuccessListener { documentReference ->
+//                Log.d(TAG, "addData")
+//            }
+//            .addOnFailureListener { e ->
+//                Log.d(TAG, "Error adding document" + e)
+//            }
+//    }
+
 
     companion object {
         private const val TIMER_DURATION = 10 * 1000L // 10秒。更新されていたらマーカーをつける
     }
 }
+
